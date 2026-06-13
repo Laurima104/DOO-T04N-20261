@@ -92,6 +92,11 @@ public class main {
 			menu.add(watchlist);
 			menu.add(assistidos);
 			
+			//painel inicial
+			JPanel inicial = new JPanel();
+			JLabel bvnd = new JLabel("Seja Bem Vindo/a/e, " + jsonArquivo.getUsuario());
+			inicial.add(bvnd, BorderLayout.CENTER);
+			
 			//painel da tela de pesquisa de series 
 			JPanel pesquisa = new JPanel();
 			JTextField campo = new JTextField();
@@ -127,9 +132,11 @@ public class main {
 			telas.add(pesquisa, "Pesquisa");
 			telas.add(resultado, "Resultado");
 			telas.add(listas, "Listas");
+			telas.add(inicial, "Inicial");
 			
 			principal.add(menu, BorderLayout.NORTH);
 			principal.add(telas, BorderLayout.CENTER);
+			cardControl.show(telas, "Inicial");
 			principal.setVisible(true);
 			
 			pesquisar.addActionListener(new ActionListener() {
