@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -46,6 +47,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -61,6 +63,7 @@ public class main {
 	//caminho do arquivo json é guardado la nas variaveis de ambiente do computador para nao ter que ficar trocando a string caso precise usar outro pc
 	static String caminho = System.getenv("arquivoJson");
 	static Path caminhoArquivo = Paths.get(caminho + arquivo);
+	static Series[] series;
 	static Scanner scan = new Scanner(System.in);
 	
 	public static void main(String[] args) {
@@ -72,45 +75,102 @@ public class main {
 	}
 
 	public static void TelaPrincipal() {
-		JFrame principal = new JFrame("MySeries");
-		principal.setSize(1500, 750);
-		principal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		JPanel menu = new JPanel();
-		JButton pesquisar = new JButton("Pesquisar Series");
-		JButton favoritos = new JButton("Series Favoritadas");
-		JButton assistidos = new JButton("Series Assistidas");
-		JButton watchlist = new JButton("Series que Pretendo Assistir");
-		menu.add(pesquisar);
-		menu.add(favoritos);
-		menu.add(watchlist);
-		menu.add(assistidos);
-		
-		JPanel pesquisa = new JPanel();
-		JTextField campo = new JTextField();
-		campo.setPreferredSize(new Dimension(100, 25));
-		JButton search = new JButton("Pesquisar");
-		JLabel info = new JLabel("Digite o Nome de Serie aqui!(somente Ingles)");
-		pesquisa.add(info);
-		pesquisa.add(campo);
-		pesquisa.add(search);
-		
-		JPanel resultado = new JPanel();
-		String[] colunas = {"ID", "Nome", "Idioma", "Generos", "Nota Geral", "Status Atual", "Data de Estreia", "Data de Termino", "Emissora"};
-		DefaultTableModel modelo = new DefaultTableModel(colunas, 0);
-		JTable tabela = new JTable(modelo);
-		JScrollPane resultados = new JScrollPane(tabela);
-		resultado.add(resultados);
-		
-		principal.add(menu, BorderLayout.NORTH);
-		principal.add(pesquisa, BorderLayout.CENTER);
-		principal.setVisible(true);
+		SwingUtilities.invokeLater(() -> {
+			JFrame principal = new JFrame("MySeries");
+			principal.setSize(1500, 750);
+			principal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			JPanel menu = new JPanel();
+			JButton pesquisar = new JButton("Pesquisar Series");
+			JButton favoritos = new JButton("Series Favoritadas");
+			JButton assistidos = new JButton("Series Assistidas");
+			JButton watchlist = new JButton("Series que Pretendo Assistir");
+			menu.add(pesquisar);
+			menu.add(favoritos);
+			menu.add(watchlist);
+			menu.add(assistidos);
+			
+			JPanel pesquisa = new JPanel();
+			JTextField campo = new JTextField();
+			campo.setPreferredSize(new Dimension(100, 25));
+			JButton search = new JButton("Pesquisar");
+			JLabel info = new JLabel("Digite o Nome de Serie aqui!(somente Ingles)");
+			pesquisa.add(info);
+			pesquisa.add(campo);
+			pesquisa.add(search);
+			
+			JPanel resultado = new JPanel();
+			String[] colunas = {"ID", "Nome", "Idioma", "Generos", "Nota Geral", "Status Atual", "Data de Estreia", "Data de Termino", "Emissora"};
+			DefaultTableModel modelo = new DefaultTableModel(colunas, 0);
+			JTable tabela = new JTable(modelo);
+			JScrollPane resultados = new JScrollPane(tabela);
+			resultado.add(resultados);
+			
+			JPanel listas = new JPanel();
+			JScrollPane listadeseries = new JScrollPane(tabela);
+			listas.add(listadeseries);
+			
+			CardLayout cardControl = new CardLayout();
+			cardControl.addLayoutComponent(pesquisa, "Pesquisa");
+			cardControl.addLayoutComponent(resultado, "Resultado");
+			cardControl.addLayoutComponent(listas, "Listas");
+			
+			JPanel telas = new JPanel(cardControl);
+			
+			principal.add(menu, BorderLayout.NORTH);
+			principal.add(telas, BorderLayout.CENTER);
+			principal.setVisible(true);
+			
+			pesquisar.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					cardControl.show(pesquisa, "Pesquisa");
+				}
+			});
+			
+			favoritos.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					cardControl.show(listas, "Listas");
+					//puxar a lista de series salvas como 1-favoritas
+				}
+			});
+			
+			assistidos.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					cardControl.show(listas, "Listas");
+					//puxar a lista de series salvas como 2-series assistidas
+				}
+			});
+			
+			watchlist.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					cardControl.show(listas, "Listas");
+					//puxar a lista de series salvas como 3-pretendo assistir
+				}
+			});
+			
+			search.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					ConsultaSeries(campo.getText());
+					for(int i = 0; i < series.length; i++) {
+						modelo.addRow(new Object[] {series[i].show.get(0).getId(), series[i].show.get(0).getName(), series[i].show.get(0).getLanguage(), series[i].show.get(0).getGenres(), series[i].show.get(0).getRating().getAverage(),
+								series[i].show.get(0).getStatus(), series[i].show.get(0).getPremiered(), series[i].show.get(0).getEnded(), series[i].show.get(0).Emissora()});
+					}
+					cardControl.show(resultado, "Resultado");
+				}
+			});
+		});
 	}
 	
-	private static void ConsultaSeries() {
+	private static void ConsultaSeries(String serie) {
 		try {
+			series = null;
 			System.out.println("Entre com o nome da serie");
-			String serie = scan.nextLine();
+			//String serie = scan.nextLine();
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 			mapper.registerModule(new JavaTimeModule());
@@ -130,11 +190,7 @@ public class main {
 			if(response.statusCode() == 200) {
 				System.out.println(response.body());
 				String json = response.body();
-				Series[] series1 = mapper.readValue(json, Series[].class);
-				System.out.println(series1.length);
-				for (int i = 0; i < series1.length; i++) {
-					System.out.println(series1[i].resumo());
-				}
+				series = mapper.readValue(json, Series[].class);
 			}
 		} catch (URISyntaxException | IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
