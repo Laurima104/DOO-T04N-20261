@@ -72,8 +72,10 @@ public class main {
 	
 	public static void main(String[] args) {
 		ConsultarArquivo();
-		if(jsonArquivo.getUsuario()==null) {
+		if(jsonArquivo.getUsuario().isEmpty() || jsonArquivo.getUsuario()==null) {
 			TelaIniciar();
+		} else {
+			TelaPrincipal();
 		}
 	}
 
@@ -382,7 +384,7 @@ public class main {
 				//como estamos recebendo apenas o show em si podemos desserializa-lo diretamente no objeto Show
 				Show serie1 = mapper.readValue(json, Show.class);
 				serie1.setLista(lista);
-				System.out.println(serie1.sla());
+				//System.out.println(serie1.sla());
 				jsonArquivo.setSeries1(serie1);
 				String jsonArchive = mapper.writeValueAsString(jsonArquivo);
 				Files.writeString(caminhoArquivo, jsonArchive);
